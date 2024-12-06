@@ -3,7 +3,17 @@
 takes in a binary and lifts the assembly into a very basic intermediate representation.
 you can then modify this intermediate representation, and reassemble it into a new binary.
 
+## currently works on:
+  - C binary with no CRT
+  - C binary with CRT
+
+## supports:
+  - jump tables
+
 ## example usage
+
+in this example, it will show rewriting the binary with basic CFF and nops
+![image](https://github.com/user-attachments/assets/ddc639b3-8101-4531-a850-b4f74ff2611f)
 
 ```cpp
 
@@ -103,12 +113,6 @@ void spam_nops_1337(BINARY* bin) {
 
 ```
 
-## currently works on:
-  - C binary with no CRT
-  - C binary with CRT
-
-## supports:
-  - jump tables
 
 ## potential issues/todos:
   - callback functions which never gets called from the binary itself
