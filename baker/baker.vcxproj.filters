@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="ext\zydis.c" />
+    <ClCompile Include="src\symbols\instruction.cpp" />
+    <ClCompile Include="src\symbols\block.cpp" />
+    <ClCompile Include="src\symbols\import.cpp" />
+    <ClCompile Include="src\symbols\symbols.cpp" />
+    <ClCompile Include="src\assembler\assembler.cpp" />
+    <ClCompile Include="src\binary.cpp" />
+    <ClCompile Include="src\utils\file.cpp" />
+    <ClCompile Include="src\logging\logging.cpp" />
+    <ClCompile Include="ext\ZycoreSrc\API\Memory.c" />
+    <ClCompile Include="ext\ZycoreSrc\API\Process.c" />
+    <ClCompile Include="ext\ZycoreSrc\API\Synchronization.c" />
+    <ClCompile Include="ext\ZycoreSrc\API\Terminal.c" />
+    <ClCompile Include="ext\ZycoreSrc\API\Thread.c" />
+    <ClCompile Include="ext\ZycoreSrc\Allocator.c" />
+    <ClCompile Include="ext\ZycoreSrc\ArgParse.c" />
+    <ClCompile Include="ext\ZycoreSrc\Bitset.c" />
+    <ClCompile Include="ext\ZycoreSrc\Format.c" />
+    <ClCompile Include="ext\ZycoreSrc\List.c" />
+    <ClCompile Include="ext\ZycoreSrc\String.c" />
+    <ClCompile Include="ext\ZycoreSrc\Vector.c" />
+    <ClCompile Include="ext\ZycoreSrc\Zycore.c" />
+    <ClCompile Include="src\disassembler\disassembler.cpp" />
+    <ClCompile Include="examples\create_beep_program.cpp" />
+    <ClCompile Include="examples\rewrite_crackme.cpp" />
+    <ClCompile Include="examples\rewrite_jumptable.cpp" />
+    <ClCompile Include="src\disassembler\parse_pe.cpp" />
+    <ClCompile Include="src\disassembler\verify.cpp" />
+    <ClCompile Include="src\disassembler\analysis\data_analysis.cpp" />
+    <ClCompile Include="src\disassembler\analysis\jump_table_analysis.cpp" />
+    <ClCompile Include="src\disassembler\analysis\code_tracer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ext\zydis.h" />
+    <ClInclude Include="src\assembler\assembler.h" />
+    <ClInclude Include="src\symbols\block.h" />
+    <ClInclude Include="src\symbols\symbols.h" />
+    <ClInclude Include="src\binary.h" />
+    <ClInclude Include="src\symbols\instruction.h" />
+    <ClInclude Include="src\symbols\import.h" />
+    <ClInclude Include="src\utils\file.h" />
+    <ClInclude Include="src\logging\logging.h" />
+    <ClInclude Include="ext\Zycore\API\Memory.h" />
+    <ClInclude Include="ext\Zycore\API\Process.h" />
+    <ClInclude Include="ext\Zycore\API\Synchronization.h" />
+    <ClInclude Include="ext\Zycore\API\Terminal.h" />
+    <ClInclude Include="ext\Zycore\API\Thread.h" />
+    <ClInclude Include="ext\Zycore\Internal\AtomicGNU.h" />
+    <ClInclude Include="ext\Zycore\Internal\AtomicMSVC.h" />
+    <ClInclude Include="ext\Zycore\Allocator.h" />
+    <ClInclude Include="ext\Zycore\ArgParse.h" />
+    <ClInclude Include="ext\Zycore\Atomic.h" />
+    <ClInclude Include="ext\Zycore\Bitset.h" />
+    <ClInclude Include="ext\Zycore\Comparison.h" />
+    <ClInclude Include="ext\Zycore\Defines.h" />
+    <ClInclude Include="ext\Zycore\Format.h" />
+    <ClInclude Include="ext\Zycore\LibC.h" />
+    <ClInclude Include="ext\Zycore\List.h" />
+    <ClInclude Include="ext\Zycore\Object.h" />
+    <ClInclude Include="ext\Zycore\Status.h" />
+    <ClInclude Include="ext\Zycore\String.h" />
+    <ClInclude Include="ext\Zycore\Types.h" />
+    <ClInclude Include="ext\Zycore\Vector.h" />
+    <ClInclude Include="ext\Zycore\Zycore.h" />
+    <ClInclude Include="src\disassembler\disassembler.h" />
+    <ClInclude Include="examples\examples.h" />
+    <ClInclude Include="src\disassembler\analysis\code_tracer.h" />
+  </ItemGroup>
+</Project>
