@@ -33,8 +33,8 @@ void control_flow_flattening(BINARY* bin) {
         BASIC_BLOCK* out_proxy_block = bin->basic_block();
         
         // push a entry, which turns into the target rva
-        int        entry_idx     = rva_table->bytes.size() / 4;
-        SYMBOL* entry         = rva_table->push_val(0, sizeof(uint32_t));
+        int     entry_idx    = rva_table->bytes.size() / 4;
+        SYMBOL* entry        = rva_table->push_val(0, sizeof(uint32_t));
         entry->target_type   = TARGET_TYPE_RVA;
         entry->target_sym_id = out_proxy_block->id;
 
