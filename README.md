@@ -10,8 +10,7 @@ you can then modify this intermediate representation, and reassemble it into a n
 ## supports:
   - jump tables
 
-## coming update:
-  - better/fixed instruction encoding
+## coming updates:
   - documentation
 
 ## example usage
@@ -55,7 +54,7 @@ void control_flow_flattening(BINARY* bin) {
     BASIC_BLOCK* dispatch_block = bin->basic_block("dispatch_block");
     dispatch_block->push({
         // rax -> index
-        Lea(rcx_, Sid(sym_image_base->id)),
+        Lea(rcx_, RipRel(sym_image_base->id)),
         Mov(eax_, MemIdx(rcx_, rax_, 4, sym_rva_table->id)),
         
         Add(ecx_, eax_),
@@ -90,18 +89,17 @@ void control_flow_flattening(BINARY* bin) {
         in_proxy_block->push({
             Push(rax_),
             Push(rcx_),
-            Mov(rax_, Imm32(entry_idx)),
-            Jmp(Sid(dispatch_block->id))
+            Mov(rax_, Imm(entry_idx)),
+            Jmp(ImmRel(dispatch_block->id))
         });
 
         out_proxy_block->push({
             Pop(rcx_),
             Pop(rax_),
-            Jmp(Sid(target_sym_id))
+            Jmp(ImmRel(target_sym_id))
         });
     }
 }
-
 ```
 
 spam nops
