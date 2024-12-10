@@ -10,6 +10,9 @@ you can then modify this intermediate representation, and reassemble it into a n
 ## supports:
   - jump tables
 
+## coming update:
+  - better/fixed instruction encoding
+
 ## example usage
 
 in this example, it will show rewriting the binary with basic CFF and nops
