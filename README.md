@@ -12,6 +12,7 @@ you can then modify this intermediate representation, and reassemble it into a n
 
 ## coming update:
   - better/fixed instruction encoding
+  - documentation
 
 ## example usage
 
