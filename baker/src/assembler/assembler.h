@@ -12,7 +12,7 @@
 struct SECTION {
     IMAGE_SECTION_HEADER hdr;
     std::vector<uint8_t> bytes;
-    int                     uninitialized_size;
+    int                  uninitialized_size;
 };
 
 struct ASSEMBLED_BINARY {

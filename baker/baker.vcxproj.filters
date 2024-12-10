@@ -33,6 +33,7 @@
     <ClCompile Include="src\disassembler\analysis\data_analysis.cpp" />
     <ClCompile Include="src\disassembler\analysis\jump_table_analysis.cpp" />
     <ClCompile Include="src\disassembler\analysis\code_tracer.cpp" />
+    <ClCompile Include="obfuscator\obfuscator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ext\zydis.h" />
@@ -69,5 +70,6 @@
     <ClInclude Include="src\disassembler\disassembler.h" />
     <ClInclude Include="examples\examples.h" />
     <ClInclude Include="src\disassembler\analysis\code_tracer.h" />
+    <ClInclude Include="obfuscator\obfuscator.h" />
   </ItemGroup>
 </Project>

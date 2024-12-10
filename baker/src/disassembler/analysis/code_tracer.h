@@ -3,10 +3,10 @@
 #pragma once
 
 struct INSTR_TRACE_FRAME {
-    int                                    instr_idx;
-    instr_t*                            instr;
-    ZydisDecodedInstruction                dec_instr;
-    std::vector<ZydisDecodedOperand>    dec_ops;
+    int                              instr_idx;
+    instr_t*                         instr;
+    ZydisDecodedInstruction          dec_instr;
+    std::vector<ZydisDecodedOperand> dec_ops;
 };
 
 
@@ -23,6 +23,6 @@ using backtrace_func_t = std::function<bool(
 */
 void bb_backtrace(
     BASIC_BLOCK*            bb,
-    int                        begin_idx,
-    ZydisDecodedOperand        target_op,
-    const backtrace_func_t    comp);
+    int                     begin_idx,
+    ZydisDecodedOperand     target_op,
+    const backtrace_func_t  comp);

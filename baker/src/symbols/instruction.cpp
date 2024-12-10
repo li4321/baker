@@ -7,41 +7,45 @@ OPERAND Reg(ZydisRegister reg) {
     return op;
 }
 
-OPERAND Imm8(uint8_t imm) {
+OPERAND Imm(int64_t immediate) {
     OPERAND op = {};
-    op.type = OP_IMM8;
-    op.imm8 = imm;
+    op.type = OP_IMM;
+    op.imm  = immediate;
     return op;
 }
 
-OPERAND Imm32(uint32_t imm) {
+OPERAND ImmRel(sym_id_t symbol_id) {
     OPERAND op = {};
-    op.type = OP_IMM32;
-    op.imm32 = imm;
+    op.type          = OP_IMMREL;
+    op.target_sym_id = symbol_id;
     return op;
 }
 
-OPERAND Imm64(uint64_t imm) {
+OPERAND RipRel(sym_id_t symbol_id, int len) {
     OPERAND op = {};
-    op.type = OP_IMM64;
-    op.imm64 = imm;
+    op.type          = OP_RIPREL;
+    op.target_sym_id = symbol_id;
+    op.len           = len;
     return op;
 }
 
-OPERAND Sid(sym_id_t sym_id) {
+OPERAND Mem(OPERAND base_reg, int disp, int len) {
     OPERAND op = {};
-    op.type = OP_SID;
-    op.target_sym_id = sym_id;
+    op.type         = OP_MEM;
+    op.mem.base_reg = base_reg.reg;
+    op.mem.disp     = disp;
+    op.len          = len;
     return op;
 }
 
-OPERAND MemIdx(OPERAND base_reg, OPERAND idx_reg, int scale, sym_id_t table_sym_id) {
+OPERAND MemIdx(OPERAND base_reg, OPERAND idx_reg, int scale, sym_id_t table_sym_id, int len) {
     OPERAND op = {};
-    op.type                    = OP_MEM_IDX;
-    op.memidx.base_reg        = base_reg.reg;
-    op.memidx.idx_reg        = idx_reg.reg;
-    op.memidx.scale            = scale;
-    op.memidx.table_sym_id  = table_sym_id;
+    op.type                = OP_MEM_IDX;
+    op.memidx.base_reg     = base_reg.reg;
+    op.memidx.idx_reg      = idx_reg.reg;
+    op.memidx.scale        = scale;
+    op.memidx.table_sym_id = table_sym_id;
+    op.len                 = len;
     return op;
 }
 
@@ -58,40 +62,45 @@ instr_t Instr(ZydisMnemonic mnemonic, OPERAND op1, OPERAND op2) {
     OPERAND* ops[2] = { &op1, &op2 };
 
     for (int i = 0; OPERAND* op : ops) {
-        ZydisEncoderOperand* req_op    = &request.operands[i];
+        ZydisEncoderOperand* req_op   = &request.operands[i];
+        OPERAND*             other_op = i ? &op1 : &op2;
 
         if (op->type != OP_NONE) {
+            if (op->type == OP_RIPREL || op->type == OP_MEM || op->type == OP_MEM_IDX) {
+                if (other_op->type == OP_REG)
+                    op->len = reg_width(other_op->reg) / 8;
+                if (other_op->type == OP_IMM)
+                    assert(op->len);
+            }
+
             switch (op->type) {
             case OP_REG:
                 req_op->type      = ZYDIS_OPERAND_TYPE_REGISTER;
                 req_op->reg.value = op->reg;
                 break;
 
-            case OP_IMM8:
-                req_op->type      = ZYDIS_OPERAND_TYPE_IMMEDIATE;
-                req_op->imm.s     = op->imm8;
+            case OP_IMM:
+                req_op->type  = ZYDIS_OPERAND_TYPE_IMMEDIATE;
+                req_op->imm.s = op->imm;
                 break;
 
-            case OP_IMM32:
-                req_op->type      = ZYDIS_OPERAND_TYPE_IMMEDIATE;
-                req_op->imm.s     = op->imm32;
+            case OP_IMMREL:
+                req_op->type  = ZYDIS_OPERAND_TYPE_IMMEDIATE;
+                req_op->imm.s = op->target_sym_id;
                 break;
 
-            case OP_IMM64:
-                req_op->type      = ZYDIS_OPERAND_TYPE_IMMEDIATE;
-                req_op->imm.s     = op->imm64;
+            case OP_RIPREL:
+                req_op->type     = ZYDIS_OPERAND_TYPE_MEMORY;
+                req_op->mem.base = ZYDIS_REGISTER_RIP;
+                req_op->mem.displacement = op->target_sym_id;
+                req_op->mem.size         = op->len;
                 break;
 
-            case OP_SID:
-                if (i == 0) {
-                    req_op->type  = ZYDIS_OPERAND_TYPE_IMMEDIATE;
-                    req_op->imm.s = op->target_sym_id;
-                } else {
-                    req_op->type     = ZYDIS_OPERAND_TYPE_MEMORY;
-                    req_op->mem.base = ZYDIS_REGISTER_RIP;
-                    req_op->mem.displacement = op->target_sym_id;
-                    req_op->mem.size = 8;
-                }
+            case OP_MEM:
+                req_op->type     = ZYDIS_OPERAND_TYPE_MEMORY;
+                req_op->mem.base = op->mem.base_reg;
+                req_op->mem.size = op->len;
+                req_op->mem.displacement = op->mem.disp;
                 break;
 
             case OP_MEM_IDX:
@@ -99,7 +108,7 @@ instr_t Instr(ZydisMnemonic mnemonic, OPERAND op1, OPERAND op2) {
                 req_op->mem.base  = op->memidx.base_reg;
                 req_op->mem.index = op->memidx.idx_reg;
                 req_op->mem.scale = op->memidx.scale;
-                req_op->mem.size  = 4;
+                req_op->mem.size  = op->len;
                 if (op->memidx.table_sym_id) {
                     req_op->mem.displacement = op->memidx.table_sym_id;
                     instr.flags |= INSTR_FLAG_MEM_IDX;
@@ -237,7 +246,7 @@ std::tuple<
     };
 }
 
-#define DEFINE_REG(reg_name, mnemonic) const OPERAND reg_name##_ = { OP_REG, mnemonic };
+#define DEFINE_REG(reg_name, mnemonic) const OPERAND reg_name##_ = { OP_REG, mnemonic, };
 
 DEFINE_REG(rax, ZYDIS_REGISTER_RAX);
 DEFINE_REG(rbx, ZYDIS_REGISTER_RBX);
@@ -281,6 +290,10 @@ DEFINE_REG(si, ZYDIS_REGISTER_SI);
 DEFINE_REG(di, ZYDIS_REGISTER_DI);
 DEFINE_REG(bp, ZYDIS_REGISTER_BP);
 DEFINE_REG(sp, ZYDIS_REGISTER_SP);
+DEFINE_REG(r8w, ZYDIS_REGISTER_R8W);
+DEFINE_REG(r9w, ZYDIS_REGISTER_R9W);
+DEFINE_REG(r10w, ZYDIS_REGISTER_R10W);
+DEFINE_REG(r11w, ZYDIS_REGISTER_R11W);
 
 DEFINE_REG(al, ZYDIS_REGISTER_AL);
 DEFINE_REG(bl, ZYDIS_REGISTER_BL);
@@ -290,3 +303,7 @@ DEFINE_REG(sil, ZYDIS_REGISTER_SIL);
 DEFINE_REG(dil, ZYDIS_REGISTER_DIL);
 DEFINE_REG(bpl, ZYDIS_REGISTER_BPL);
 DEFINE_REG(spl, ZYDIS_REGISTER_SPL);
+DEFINE_REG(r8b, ZYDIS_REGISTER_R8B);
+DEFINE_REG(r9b, ZYDIS_REGISTER_R9B);
+DEFINE_REG(r10b, ZYDIS_REGISTER_R10B);
+DEFINE_REG(r11b, ZYDIS_REGISTER_R11B);

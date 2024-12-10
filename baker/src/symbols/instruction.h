@@ -19,25 +19,30 @@ enum INSTR_OP_TYPE {
     OP_NONE,
     OP_REG,
 
-    OP_IMM8,
-    OP_IMM32,
-    OP_IMM64,
+    OP_IMM,
     
-    OP_SID,
+    OP_IMMREL,
+    OP_RIPREL,
 
+    OP_MEM,
     OP_MEM_IDX
 };
 
 struct OPERAND {
     INSTR_OP_TYPE type;
-    
+
     union {
-        uint8_t       imm8;
-        uint32_t      imm32;
-        uint64_t      imm64;
-        sym_id_t      target_sym_id;
+        int64_t imm;
+        
+        sym_id_t target_sym_id;
+        
         ZydisRegister reg;
     
+        struct {
+            ZydisRegister base_reg;
+            int           disp;
+        } mem;
+        
         struct {
             ZydisRegister base_reg;
             ZydisRegister idx_reg;
@@ -45,15 +50,19 @@ struct OPERAND {
             sym_id_t      table_sym_id;
         } memidx;
     };
+
+    int len;
 };
 
 
 OPERAND Reg   (ZydisRegister reg);
-OPERAND Imm8  (uint8_t immediate);
-OPERAND Imm32 (uint32_t immediate);
-OPERAND Imm64 (uint64_t immediate);
-OPERAND Sid   (sym_id_t symbol_id);
-OPERAND MemIdx(OPERAND base_reg, OPERAND idx_reg, int scale, sym_id_t table_sym_id = 0);
+OPERAND Imm  (int64_t immediate);
+
+OPERAND ImmRel(sym_id_t symbol_id);
+OPERAND RipRel(sym_id_t symbol_id, int len = 8);
+
+OPERAND Mem   (OPERAND base_reg, int disp, int len = 8);
+OPERAND MemIdx(OPERAND base_reg, OPERAND idx_reg, int scale, sym_id_t table_sym_id = 0, int len = 8);
 
 instr_t Instr(ZydisMnemonic mnemonic, OPERAND op1, OPERAND op2);
 
@@ -90,7 +99,7 @@ std::tuple<
 
 
 #define DECLARE_instr_t0(func_name, mnemonic) inline instr_t func_name()                            { return Instr(mnemonic, {},  {});  }
-#define DECLARE_instr_t1(func_name, mnemonic) inline instr_t func_name(OPERAND op1)                    { return Instr(mnemonic, op1, {});  }
+#define DECLARE_instr_t1(func_name, mnemonic) inline instr_t func_name(OPERAND op1)                 { return Instr(mnemonic, op1, {});  }
 #define DECLARE_instr_t2(func_name, mnemonic) inline instr_t func_name(OPERAND op1, OPERAND op2)    { return Instr(mnemonic, op1, op2); }
 
 // data movement
@@ -110,6 +119,9 @@ DECLARE_instr_t1(Jmp, ZYDIS_MNEMONIC_JMP);
 
 // conditional
 DECLARE_instr_t2(Cmp, ZYDIS_MNEMONIC_CMP);
+DECLARE_instr_t2(Test, ZYDIS_MNEMONIC_TEST);
+DECLARE_instr_t0(Pushfq, ZYDIS_MNEMONIC_PUSHFQ);
+DECLARE_instr_t0(Popfq, ZYDIS_MNEMONIC_POPFQ);
 
 // control-flow
 DECLARE_instr_t1(Jz, ZYDIS_MNEMONIC_JZ);
@@ -125,8 +137,17 @@ DECLARE_instr_t2(Xor, ZYDIS_MNEMONIC_XOR);
 DECLARE_instr_t2(Or, ZYDIS_MNEMONIC_OR);
 
 // arithmatic operation
+DECLARE_instr_t1(Inc, ZYDIS_MNEMONIC_INC);
+DECLARE_instr_t1(Dec, ZYDIS_MNEMONIC_DEC);
 DECLARE_instr_t2(Add, ZYDIS_MNEMONIC_ADD);
 DECLARE_instr_t2(Sub, ZYDIS_MNEMONIC_SUB);
+DECLARE_instr_t2(Imul, ZYDIS_MNEMONIC_IMUL);
+DECLARE_instr_t2(Idiv, ZYDIS_MNEMONIC_IDIV);
+DECLARE_instr_t2(Mul, ZYDIS_MNEMONIC_MUL);
+DECLARE_instr_t2(Div, ZYDIS_MNEMONIC_DIV);
+DECLARE_instr_t2(Shl, ZYDIS_MNEMONIC_SHL);
+DECLARE_instr_t2(Shr, ZYDIS_MNEMONIC_SHR);
+
 
 // other
 DECLARE_instr_t0(Nop, ZYDIS_MNEMONIC_NOP);
@@ -176,6 +197,11 @@ DECLARE_REG(si, ZYDIS_REGISTER_SI);
 DECLARE_REG(di, ZYDIS_REGISTER_DI);
 DECLARE_REG(bp, ZYDIS_REGISTER_BP);
 DECLARE_REG(sp, ZYDIS_REGISTER_SP);
+DECLARE_REG(r8w, ZYDIS_REGISTER_R8W);
+DECLARE_REG(r9w, ZYDIS_REGISTER_R9W);
+DECLARE_REG(r10w, ZYDIS_REGISTER_R10W);
+DECLARE_REG(r11w, ZYDIS_REGISTER_R11W);
+
 
 DECLARE_REG(al, ZYDIS_REGISTER_AL);
 DECLARE_REG(bl, ZYDIS_REGISTER_BL);
@@ -185,3 +211,7 @@ DECLARE_REG(sil, ZYDIS_REGISTER_SIL);
 DECLARE_REG(dil, ZYDIS_REGISTER_DIL);
 DECLARE_REG(bpl, ZYDIS_REGISTER_BPL);
 DECLARE_REG(spl, ZYDIS_REGISTER_SPL);
+DECLARE_REG(r8b, ZYDIS_REGISTER_R8B);
+DECLARE_REG(r9b, ZYDIS_REGISTER_R9B);
+DECLARE_REG(r10b, ZYDIS_REGISTER_R10B);
+DECLARE_REG(r11b, ZYDIS_REGISTER_R11B);

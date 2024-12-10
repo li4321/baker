@@ -37,8 +37,8 @@ bool compare_operands(const ZydisDecodedOperand& op_1, const ZydisDecodedOperand
 */
 void bb_backtrace(
     BASIC_BLOCK*             bb,
-    int                         begin_idx,
-    ZydisDecodedOperand         target_op,
+    int                      begin_idx,
+    ZydisDecodedOperand      target_op,
     const backtrace_func_t   comp
 ) {
     for (int i = begin_idx; i >= 0; i--) {

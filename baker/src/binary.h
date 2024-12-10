@@ -38,6 +38,10 @@ struct BINARY {
 
     // relative info
     SYMBOL* rel_info(uint32_t rel_offset, std::string name = "");
+
+    // getters
+    SYMBOL*     get_symbol(std::string name);
+    DATA_BLOCK* get_data_block(std::string name);
 };
 
 void binary_duplicate(const BINARY* bin, BINARY* new_bin);

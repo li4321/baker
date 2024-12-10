@@ -99,3 +99,33 @@ SYMBOL* BINARY::rel_info(uint32_t rel_offset, std::string name) {
     
     return sym;
 }
+
+//
+// GETTERS
+//
+
+SYMBOL* BINARY::get_symbol(std::string name) {
+    auto it = std::find_if(begin(symbols), end(symbols),
+        [&](const SYMBOL* sym) {
+            return sym->name == name;
+        }
+    );
+
+    if (it == end(symbols))
+        return nullptr;
+
+    return *it;
+}
+
+DATA_BLOCK* BINARY::get_data_block(std::string name) {
+    auto it = std::find_if(begin(data_blocks), end(data_blocks), 
+        [&](const DATA_BLOCK* db) {
+            return db->name == name;
+        }
+    );
+
+    if (it == end(data_blocks))
+        return nullptr;
+
+    return *it;
+}

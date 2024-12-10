@@ -100,7 +100,7 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
         if (i < (basic_blocks.size() - 1) && basic_blocks[i + 1]->id == bb->fallthrough_sym_id)
             continue;
 
-        bb->push(Jmp(Sid(bb->fallthrough_sym_id)));
+        bb->push(Jmp(ImmRel(bb->fallthrough_sym_id)));
     }
 
     //

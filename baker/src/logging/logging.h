@@ -6,7 +6,7 @@ std::string serialize_sym(SYMBOL* sym);
 std::string serialize_instr_ex(ZydisDecoder* decoder, ZydisFormatter* formatter, const instr_t* instr, void* user_data = nullptr);
 std::string serialize_instr(struct BINARY* bin, const instr_t* instr);
 
-#define DEBUG_LOGGING
+// #define DEBUG_LOGGING
 
 std::string fmtf(_Printf_format_string_ const char* format, ...);
 void printf_ex(int color, _Printf_format_string_  const char* fmt, ...);

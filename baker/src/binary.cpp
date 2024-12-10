@@ -82,9 +82,9 @@ ZyanStatus hook_zydis_format_operand_mem(
         color = BRIGHT_GREEN;
 
     if (!sym->name.empty()) {
-        ZyanStringAppendFormat(str, "\033[%dmsym_%u/%s\033[0m", color, sym->id, sym->name.c_str());
+        ZyanStringAppendFormat(str, "[\033[%dmsym_%u/%s\033[0m]", color, sym->id, sym->name.c_str());
     } else {
-        ZyanStringAppendFormat(str, "\033[%dmsym_%u\033[0m", color, sym->id);
+        ZyanStringAppendFormat(str, "[\033[%dmsym_%u\033[0m]", color, sym->id);
     }
 
     return ZYAN_STATUS_SUCCESS;

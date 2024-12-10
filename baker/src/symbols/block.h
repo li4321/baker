@@ -37,8 +37,8 @@ struct DATA_BLOCK {
 
     struct BINARY* bin_;
 
-    struct SYMBOL* data_sym(int db_offset, enum TARGET_TYPE target_type = (enum TARGET_TYPE)0, sym_id_t target_id = nullsid);
-    struct SYMBOL* push_val(uint64_t val, int len);
+    struct SYMBOL* data_sym(int db_offset,          enum TARGET_TYPE target_type = (enum TARGET_TYPE)0, sym_id_t target_id = nullsid);
+    struct SYMBOL* push_val(uint64_t val, int len,  enum TARGET_TYPE target_type = (enum TARGET_TYPE)0, sym_id_t target_id = nullsid);
     struct SYMBOL* push_buf(const void* buf, int len);
     struct SYMBOL* push_str(std::string str, bool nullterm = true);
 };

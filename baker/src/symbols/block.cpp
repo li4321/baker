@@ -52,7 +52,6 @@ size_t BASIC_BLOCK::size() {
     return size;
 }
 
-
 SYMBOL* DATA_BLOCK::data_sym(int db_offset, enum TARGET_TYPE target_type, sym_id_t target_id) {
     SYMBOL* sym        = nullptr;
     bool    reusing    = false;
@@ -83,11 +82,16 @@ SYMBOL* DATA_BLOCK::data_sym(int db_offset, enum TARGET_TYPE target_type, sym_id
     return sym;
 }
 
-SYMBOL* DATA_BLOCK::push_val(uint64_t val, int len) {
+SYMBOL* DATA_BLOCK::push_val(uint64_t val, int len, TARGET_TYPE target_type, sym_id_t target_id) {
     SYMBOL* sym = data_sym(bytes.size());
 
     bytes.insert(end(bytes), len, 0);
     memcpy(bytes.data(), &val, len);
+
+    if (target_type) {
+        sym->target_type = target_type;
+        sym->target_sym_id = target_id;
+    }
 
     logger_log(
         WHITE, fmtf("%s +val %d", this->name.c_str(), len),

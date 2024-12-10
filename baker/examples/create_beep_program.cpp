@@ -17,18 +17,18 @@ void create_beep_program() {
     BASIC_BLOCK* bb_end       = bin.basic_block();
 
     bb_main->push({
-        Lea(rax_, Sid(str_hello_world)),
+        Lea(rax_, RipRel(str_hello_world)),
         }).fall(bb_call_beep->id);
 
     // Beep(1000, 1000);
     
     bb_call_beep->push({
-        Mov(rax_, Sid(imp_Beep)),
-        Mov(rcx_, Imm32(1000)),
-        Mov(rdx_, Imm32(1000)),
-        Sub(rsp_, Imm32(0x28)),
+        Mov(rax_, RipRel(imp_Beep)),
+        Mov(rcx_, Imm(1000)),
+        Mov(rdx_, Imm(1000)),
+        Sub(rsp_, Imm(0x28)),
         Call(rax_),
-        Add(rsp_, Imm32(0x28)),
+        Add(rsp_, Imm(0x28)),
         }).fall(bb_end->id);
 
     bb_junk->push({
@@ -38,7 +38,7 @@ void create_beep_program() {
         });
 
     bb_end->push({
-        Mov(rax_, Imm32(1234)),
+        Mov(rax_, Imm(1234)),
         Ret()
         });
 

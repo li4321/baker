@@ -212,7 +212,7 @@ void DISASSEMBLER::disassemble() {
                 dec_instr.meta.category == ZYDIS_CATEGORY_COND_BR ||
                 dec_instr.meta.category == ZYDIS_CATEGORY_UNCOND_BR ||
                 (dec_instr.meta.category == ZYDIS_CATEGORY_INTERRUPT && dec_instr.raw.imm[0].value.s == 0x29)) {
-                    
+                
                 // if this is a conditional branch
                 // we will need to make this fall to the next block
                 if (dec_instr.meta.category == ZYDIS_CATEGORY_COND_BR) {
