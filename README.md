@@ -44,7 +44,6 @@ in this example, it will show rewriting the binary with basic CFF and nops
 
 flatten control flow
 ```cpp
-
 void control_flow_flattening(BINARY* bin) {
     SYMBOL*     sym_image_base = bin->rel_info(0, "__ImageBase");
     DATA_BLOCK* rva_table      = bin->data_block(0, false, "cff_data");
@@ -100,11 +99,11 @@ void control_flow_flattening(BINARY* bin) {
         });
     }
 }
+
 ```
 
 spam nops
 ```cpp
-  
 void spam_nops_1337(BINARY* bin) {
     for (BASIC_BLOCK* bb : bin->basic_blocks) {
         for (int i = bb->instrs.size(); i > 0; i--) {
@@ -112,9 +111,7 @@ void spam_nops_1337(BINARY* bin) {
         }
     }
 }
-
 ```
-
 
 ## potential issues/todos:
   - callback functions which never gets called from the binary itself
