@@ -8,15 +8,24 @@
 #include <Zycore/Zycore.h>
 #include <Zycore/Format.h>
 
+struct SECT_CONFIG {
+    std::string name;
+    uint32_t    characteristics;
+};
+
 struct BINARY {
     // binary
     std::vector<BASIC_BLOCK*>   basic_blocks;
     std::vector<DATA_BLOCK*>    data_blocks;
     std::vector<IMPORT_MODULE*> import_modules;
-    // index of symbol = symbol id
-    std::vector<SYMBOL*>        symbols;
-    BASIC_BLOCK*                entry_point;
     
+    // index of symbol = symbol id
+    std::vector<SYMBOL*> symbols;
+    BASIC_BLOCK*         entry_point;
+
+    // section configs (optional)
+    std::vector<SECT_CONFIG> extra_sects;
+
     ZydisFormatter formatter;
     ZydisDecoder   decoder;
     BINARY();

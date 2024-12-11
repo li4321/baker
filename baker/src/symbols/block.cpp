@@ -1,6 +1,6 @@
 #include "../binary.h"
 
-BASIC_BLOCK& BASIC_BLOCK::insert(int idx, instr_t instr) {
+BASIC_BLOCK* BASIC_BLOCK::insert(int idx, instr_t instr) {
     SYMBOL* sym = bin_->symbols[this->id];
 
     logger_log(
@@ -11,28 +11,28 @@ BASIC_BLOCK& BASIC_BLOCK::insert(int idx, instr_t instr) {
     );
 
     instrs.insert(begin(instrs) + idx, instr);
-    return *this;
+    return this;
 }
 
-BASIC_BLOCK& BASIC_BLOCK::insert(int idx, std::vector<instr_t> instructions_array) {
+BASIC_BLOCK* BASIC_BLOCK::insert(int idx, std::vector<instr_t> instructions_array) {
     for (int i = idx; auto & instr : instructions_array) {
         this->insert(i++, instr);
     }
-    return *this;
+    return this;
 }
 
 
-BASIC_BLOCK& BASIC_BLOCK::push(instr_t instr) {
+BASIC_BLOCK* BASIC_BLOCK::push(instr_t instr) {
     this->insert(instrs.size(), instr);
-    return *this;
+    return this;
 }
 
-BASIC_BLOCK& BASIC_BLOCK::push(std::vector<instr_t> instructions_array) {
+BASIC_BLOCK* BASIC_BLOCK::push(std::vector<instr_t> instructions_array) {
     this->insert(instrs.size(), instructions_array);
-    return *this;
+    return this;
 }
 
-BASIC_BLOCK& BASIC_BLOCK::fall(sym_id_t sym_id) {
+BASIC_BLOCK* BASIC_BLOCK::fall(sym_id_t sym_id) {
     fallthrough_sym_id = sym_id;
 
     SYMBOL* sym = bin_->symbols[this->id];
@@ -41,7 +41,12 @@ BASIC_BLOCK& BASIC_BLOCK::fall(sym_id_t sym_id) {
         WHITE, sym->name.empty() 
         ? fmtf("%d --> %d\n", this->id, fallthrough_sym_id)
         : fmtf("%s, %d --> %d\n", sym->name.c_str(), this->id, fallthrough_sym_id));
-    return *this;
+    return this;
+}
+
+BASIC_BLOCK* BASIC_BLOCK::fall_to_next() {
+    fall(id + 1);
+    return this;
 }
 
 size_t BASIC_BLOCK::size() {
@@ -52,12 +57,17 @@ size_t BASIC_BLOCK::size() {
     return size;
 }
 
+BASIC_BLOCK* BASIC_BLOCK::map_to_sect(std::string sect_name) {
+    this->parent_sect = sect_name;
+    return this;
+}
+
 SYMBOL* DATA_BLOCK::data_sym(int db_offset, enum TARGET_TYPE target_type, sym_id_t target_id) {
     SYMBOL* sym        = nullptr;
     bool    reusing    = false;
 
     if (dboffset_to_sym[db_offset]) {
-        sym        = dboffset_to_sym[db_offset];
+        sym     = dboffset_to_sym[db_offset];
         reusing = true;
     } else {
         sym = new SYMBOL{};
@@ -65,8 +75,8 @@ SYMBOL* DATA_BLOCK::data_sym(int db_offset, enum TARGET_TYPE target_type, sym_id
         bin_->symbols.push_back(sym);
 
         sym->type        = SYMBOL_TYPE_DATA;
-        sym->db            = this;
-        sym->db_offset    = db_offset;
+        sym->db          = this;
+        sym->db_offset   = db_offset;
         dboffset_to_sym[db_offset] = sym;
     }
 
@@ -141,4 +151,9 @@ SYMBOL* DATA_BLOCK::push_str(std::string str, bool nullterm) {
         WHITE, fmtf("%s\n", str.c_str()));
 
     return sym;
+}
+
+DATA_BLOCK* DATA_BLOCK::map_to_sect(std::string sect_name) {
+    this->parent_sect = sect_name;
+    return this;
 }

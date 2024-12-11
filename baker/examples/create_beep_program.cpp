@@ -18,7 +18,7 @@ void create_beep_program() {
 
     bb_main->push({
         Lea(rax_, RipRel(str_hello_world)),
-        }).fall(bb_call_beep->id);
+        })->fall(bb_call_beep->id);
 
     // Beep(1000, 1000);
     
@@ -29,7 +29,7 @@ void create_beep_program() {
         Sub(rsp_, Imm(0x28)),
         Call(rax_),
         Add(rsp_, Imm(0x28)),
-        }).fall(bb_end->id);
+        })->fall(bb_end->id);
 
     bb_junk->push({
         Nop(),

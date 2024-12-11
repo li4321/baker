@@ -241,7 +241,8 @@ void binary_print(BINARY* bin) {
     printf_ex(BRIGHT_BLUE, "--------------CODE--------------------------\n");
 
     for (BASIC_BLOCK* bb : bin->basic_blocks) {
-        printf_ex(BRIGHT_BLUE, "[basic block]: %d, size: %d\n", bb->id, bb->size());
+        printf_ex(BRIGHT_BLUE, "[basic block]: %d, size: %d   %s\n", bb->id, bb->size(),
+            bin->symbols[bb->id]->name.c_str());
 
         for (int bb_offset = 0; instr_t instr : bb->instrs) {
             printf("\t+%-4d: %s\n", bb_offset, serialize_instr(bin, &instr).c_str());

@@ -46,7 +46,7 @@ void opaque_predicates(BINARY* bin) {
                 Push(root_reg),          // save register
                 Test(reg, Imm(1)),     // check if even
                 Jz(ImmRel(even_branch->id))
-            }).fall(odd_branch->id);
+            })->fall(odd_branch->id);
 
             // even branch
             // (x/2) * 2 == x

@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="ext\zydis.c" />
     <ClCompile Include="src\symbols\instruction.cpp" />
     <ClCompile Include="src\symbols\block.cpp" />
@@ -33,7 +32,6 @@
     <ClCompile Include="src\disassembler\analysis\data_analysis.cpp" />
     <ClCompile Include="src\disassembler\analysis\jump_table_analysis.cpp" />
     <ClCompile Include="src\disassembler\analysis\code_tracer.cpp" />
-    <ClCompile Include="obfuscator\obfuscator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ext\zydis.h" />
@@ -70,6 +68,5 @@
     <ClInclude Include="src\disassembler\disassembler.h" />
     <ClInclude Include="examples\examples.h" />
     <ClInclude Include="src\disassembler\analysis\code_tracer.h" />
-    <ClInclude Include="obfuscator\obfuscator.h" />
   </ItemGroup>
 </Project>

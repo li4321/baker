@@ -155,8 +155,6 @@
     <ClCompile Include="ext\ZycoreSrc\Vector.c" />
     <ClCompile Include="ext\ZycoreSrc\Zycore.c" />
     <ClCompile Include="ext\zydis.c" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="obfuscator\obfuscator.cpp" />
     <ClCompile Include="src\assembler\assembler.cpp" />
     <ClCompile Include="src\binary.cpp" />
     <ClCompile Include="src\disassembler\analysis\code_tracer.cpp" />
@@ -197,7 +195,6 @@
     <ClInclude Include="ext\Zycore\Vector.h" />
     <ClInclude Include="ext\Zycore\Zycore.h" />
     <ClInclude Include="ext\zydis.h" />
-    <ClInclude Include="obfuscator\obfuscator.h" />
     <ClInclude Include="src\assembler\assembler.h" />
     <ClInclude Include="src\binary.h" />
     <ClInclude Include="src\disassembler\analysis\code_tracer.h" />
