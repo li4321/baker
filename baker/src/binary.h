@@ -30,7 +30,7 @@ struct BINARY {
     BASIC_BLOCK*         entry_point;
 
     // section configs (optional)
-    std::vector<SECT_CONFIG> extra_sects;
+    // std::vector<SECT_CONFIG> extra_sects;
 
     ZydisFormatter formatter;
     ZydisDecoder   decoder;
