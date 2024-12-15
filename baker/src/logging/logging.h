@@ -1,4 +1,6 @@
 #include "../symbols/symbols.h"
+#include <Zydis/Decoder.h>
+#include <Zydis/Formatter.h>
 #include <format>
 #pragma once
 

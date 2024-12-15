@@ -40,7 +40,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -105,14 +105,20 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)ext;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\dependencies\zydis\include;$(SolutionDir)\dependencies\zydis\dependencies\zycore\include%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\zydis\msvc\bin\DebugX64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Lib>
+      <AdditionalDependencies>zydis.lib;zycore.lib</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\zydis\msvc\bin\DebugX64</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -138,23 +144,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="examples\create_beep_program.cpp" />
-    <ClCompile Include="examples\rewrite_crackme.cpp" />
-    <ClCompile Include="examples\rewrite_jumptable.cpp" />
-    <ClCompile Include="ext\ZycoreSrc\Allocator.c" />
-    <ClCompile Include="ext\ZycoreSrc\API\Memory.c" />
-    <ClCompile Include="ext\ZycoreSrc\API\Process.c" />
-    <ClCompile Include="ext\ZycoreSrc\API\Synchronization.c" />
-    <ClCompile Include="ext\ZycoreSrc\API\Terminal.c" />
-    <ClCompile Include="ext\ZycoreSrc\API\Thread.c" />
-    <ClCompile Include="ext\ZycoreSrc\ArgParse.c" />
-    <ClCompile Include="ext\ZycoreSrc\Bitset.c" />
-    <ClCompile Include="ext\ZycoreSrc\Format.c" />
-    <ClCompile Include="ext\ZycoreSrc\List.c" />
-    <ClCompile Include="ext\ZycoreSrc\String.c" />
-    <ClCompile Include="ext\ZycoreSrc\Vector.c" />
-    <ClCompile Include="ext\ZycoreSrc\Zycore.c" />
-    <ClCompile Include="ext\zydis.c" />
     <ClCompile Include="src\assembler\assembler.cpp" />
     <ClCompile Include="src\binary.cpp" />
     <ClCompile Include="src\disassembler\analysis\code_tracer.cpp" />
@@ -171,30 +160,6 @@
     <ClCompile Include="src\logging\logging.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="examples\examples.h" />
-    <ClInclude Include="ext\Zycore\Allocator.h" />
-    <ClInclude Include="ext\Zycore\API\Memory.h" />
-    <ClInclude Include="ext\Zycore\API\Process.h" />
-    <ClInclude Include="ext\Zycore\API\Synchronization.h" />
-    <ClInclude Include="ext\Zycore\API\Terminal.h" />
-    <ClInclude Include="ext\Zycore\API\Thread.h" />
-    <ClInclude Include="ext\Zycore\ArgParse.h" />
-    <ClInclude Include="ext\Zycore\Atomic.h" />
-    <ClInclude Include="ext\Zycore\Bitset.h" />
-    <ClInclude Include="ext\Zycore\Comparison.h" />
-    <ClInclude Include="ext\Zycore\Defines.h" />
-    <ClInclude Include="ext\Zycore\Format.h" />
-    <ClInclude Include="ext\Zycore\Internal\AtomicGNU.h" />
-    <ClInclude Include="ext\Zycore\Internal\AtomicMSVC.h" />
-    <ClInclude Include="ext\Zycore\LibC.h" />
-    <ClInclude Include="ext\Zycore\List.h" />
-    <ClInclude Include="ext\Zycore\Object.h" />
-    <ClInclude Include="ext\Zycore\Status.h" />
-    <ClInclude Include="ext\Zycore\String.h" />
-    <ClInclude Include="ext\Zycore\Types.h" />
-    <ClInclude Include="ext\Zycore\Vector.h" />
-    <ClInclude Include="ext\Zycore\Zycore.h" />
-    <ClInclude Include="ext\zydis.h" />
     <ClInclude Include="src\assembler\assembler.h" />
     <ClInclude Include="src\binary.h" />
     <ClInclude Include="src\disassembler\analysis\code_tracer.h" />
