@@ -5,12 +5,6 @@
 #include "symbols/symbols.h"
 #include "logging/logging.h"
 
-#include <Zydis/Formatter.h>
-#include <Zydis/Encoder.h>
-#include <Zydis/Decoder.h>
-#include <Zydis/Zydis.h>
-#include <Zydis/Utils.h>
-
 #include <Zycore/Zycore.h>
 #include <Zycore/Format.h>
 

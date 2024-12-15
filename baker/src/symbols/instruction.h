@@ -3,8 +3,7 @@
 #include <stdio.h>
 #include <Windows.h>
 
-#include <Zydis/Decoder.h>
-#include <Zydis/Encoder.h>
+#include "../../ext/zydis.h"
 
 typedef uint32_t sym_id_t;
 

@@ -11,8 +11,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExampleCrackMe", "ExampleCr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExampleJumpTable", "ExampleJumpTable\ExampleJumpTable.vcxproj", "{A7A527F2-31BC-4C13-BC32-FCC3AC1A6896}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExampleBakerUsage", "ExampleBakerUsage\ExampleBakerUsage.vcxproj", "{5A1F1249-24FE-49A3-BD7A-69715A5A14F4}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -45,14 +43,6 @@ Global
 		{A7A527F2-31BC-4C13-BC32-FCC3AC1A6896}.Release|x64.Build.0 = Release|x64
 		{A7A527F2-31BC-4C13-BC32-FCC3AC1A6896}.Release|x86.ActiveCfg = Release|Win32
 		{A7A527F2-31BC-4C13-BC32-FCC3AC1A6896}.Release|x86.Build.0 = Release|Win32
-		{5A1F1249-24FE-49A3-BD7A-69715A5A14F4}.Debug|x64.ActiveCfg = Debug|x64
-		{5A1F1249-24FE-49A3-BD7A-69715A5A14F4}.Debug|x64.Build.0 = Debug|x64
-		{5A1F1249-24FE-49A3-BD7A-69715A5A14F4}.Debug|x86.ActiveCfg = Debug|Win32
-		{5A1F1249-24FE-49A3-BD7A-69715A5A14F4}.Debug|x86.Build.0 = Debug|Win32
-		{5A1F1249-24FE-49A3-BD7A-69715A5A14F4}.Release|x64.ActiveCfg = Release|x64
-		{5A1F1249-24FE-49A3-BD7A-69715A5A14F4}.Release|x64.Build.0 = Release|x64
-		{5A1F1249-24FE-49A3-BD7A-69715A5A14F4}.Release|x86.ActiveCfg = Release|Win32
-		{5A1F1249-24FE-49A3-BD7A-69715A5A14F4}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,7 +50,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{AEA8BE4F-D891-4559-B153-356596B50530} = {EE2E34F2-3BCC-4D7B-9688-44C1880EF6AB}
 		{A7A527F2-31BC-4C13-BC32-FCC3AC1A6896} = {EE2E34F2-3BCC-4D7B-9688-44C1880EF6AB}
-		{5A1F1249-24FE-49A3-BD7A-69715A5A14F4} = {EE2E34F2-3BCC-4D7B-9688-44C1880EF6AB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {502B6124-B30B-4415-A41D-43D78F1B37D8}

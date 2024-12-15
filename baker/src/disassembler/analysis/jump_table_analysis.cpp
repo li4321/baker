@@ -89,7 +89,7 @@ void DISASSEMBLER::collect_jump_tables() {
 
         // if there was a displacement within the index load
         // then the base should be the image base
-        if (load_idx_mem_op->mem.disp.value) {
+        if (load_idx_mem_op->mem.disp.has_displacement) {
             if (sym->type != SYMBOL_TYPE_RELATIVE_INFO && sym->rel_offset != 0) {
                 logger_warn("load_idx had displacement, but base was not the image base\n");
                 continue;
@@ -127,7 +127,7 @@ void DISASSEMBLER::collect_jump_tables() {
             jpt_sym = bin.symbols[rva_entry.id];
         }
 
-        if (load_idx_mem_op->mem.disp.value) {
+        if (load_idx_mem_op->mem.disp.has_displacement) {
             // replace the displacement with the jump table symbol id
             assert(load_idx.dec_instr.raw.disp.size == 32);
             memcpy(load_idx.instr->bytes + load_idx.dec_instr.raw.disp.offset,

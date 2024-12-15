@@ -5,6 +5,8 @@
 #include <set>
 #include <Windows.h>
 
+#include "../../ext/zydis.h"
+
 #include "../binary.h"
 
 struct SECTION {
