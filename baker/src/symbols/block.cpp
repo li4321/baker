@@ -57,10 +57,20 @@ size_t BASIC_BLOCK::size() {
     return size;
 }
 
+uint32_t BASIC_BLOCK::get_instr_offset(int idx) {
+    uint32_t offset = 0;
+    for (int i = 0; i < idx; i++) {
+        offset += instrs[i].len;
+    }
+    return offset;
+}
+
+/*
 BASIC_BLOCK* BASIC_BLOCK::map_to_sect(std::string sect_name) {
     this->parent_sect = sect_name;
     return this;
 }
+*/
 
 SYMBOL* DATA_BLOCK::data_sym(int db_offset, enum TARGET_TYPE target_type, sym_id_t target_id) {
     SYMBOL* sym        = nullptr;
