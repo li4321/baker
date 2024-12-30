@@ -129,3 +129,55 @@ DATA_BLOCK* BINARY::get_data_block(std::string name) {
 
     return *it;
 }
+
+std::vector<XREF> BINARY::get_xrefs(sym_id_t target_sym_id) {
+    std::vector<XREF> xrefs = {};
+    for (SYMBOL* sym : symbols) {
+        if (sym->type == SYMBOL_TYPE_CODE) {
+            BASIC_BLOCK* bb = sym->bb;
+            
+            for (int i = 0; i < bb->instrs.size(); i++) {
+                instr_t* instr = &bb->instrs[i];
+                auto [dec_ctx, dec_instr] = decode_instr(&decoder, instr->bytes, instr->len);
+
+                sym_id_t sym_id = get_sym_id(instr, &dec_instr);
+                
+                if (sym_id == target_sym_id) {
+                    xrefs.push_back({ sym, i });
+                }
+            }
+            
+            if (bb->fallthrough_sym_id == target_sym_id) {
+                xrefs.push_back({ sym, -1 });
+            }
+        }
+
+        else if (sym->type == SYMBOL_TYPE_DATA) {
+            if (sym->target_sym_id == target_sym_id)
+                xrefs.push_back({ sym });
+        }
+    }
+    return xrefs;
+}
+
+std::vector<XREF> BINARY::get_xrefs(BASIC_BLOCK* bb, sym_id_t target_sym_id) {
+    std::vector<XREF> xrefs = {};
+    SYMBOL* sym = symbols[bb->id];
+    
+    for (int i = 0; i < bb->instrs.size(); i++) {
+        instr_t* instr = &bb->instrs[i];
+        auto [dec_ctx, dec_instr] = decode_instr(&decoder, instr->bytes, instr->len);
+
+        sym_id_t sym_id = get_sym_id(instr, &dec_instr);
+
+        if (sym_id == target_sym_id) {
+            xrefs.push_back({ sym, i });
+        }
+    }
+
+    if (bb->fallthrough_sym_id == target_sym_id) {
+        xrefs.push_back({ sym, -1 });
+    }
+
+    return xrefs;
+}

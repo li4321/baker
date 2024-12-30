@@ -66,16 +66,15 @@ uint32_t calculate_binary_virtual_size(ASSEMBLED_BINARY* s) {
     return filesize;
 }
 
-ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
-    ASSEMBLED_BINARY s = {};
+ASSEMBLED_BINARY* build_pe(const BINARY* bin_) {
+    ASSEMBLED_BINARY* s = new ASSEMBLED_BINARY{};
+    binary_duplicate(bin_, &s->bin);
+    s->entry_point        = 0;
+    s->image_base         = 0x140000000;
+    s->section_alignment  = 0x1000;
+    s->file_alignment     = 0x200;
 
-    binary_duplicate(bin_, &s.bin);
-    s.entry_point        = 0;
-    s.image_base         = 0x140000000;
-    s.section_alignment  = 0x1000;
-    s.file_alignment     = 0x200;
-
-    auto& bin            = s.bin;
+    auto& bin            = s->bin;
     auto& import_modules = bin.import_modules;
     auto& basic_blocks   = bin.basic_blocks;
     auto& data_blocks    = bin.data_blocks;
@@ -203,22 +202,22 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
     // generate sections
     //
 
-    s.text_sect  = new_sect(&s, ".text",  IMAGE_SCN_CNT_CODE             | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_EXECUTE);
-    s.rdata_sect = new_sect(&s, ".rdata", IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ);
-    s.data_sect  = new_sect(&s, ".data",  IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE);
-    update_sections(&s);
+    s->text_sect  = new_sect(s, ".text",  IMAGE_SCN_CNT_CODE             | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_EXECUTE);
+    s->rdata_sect = new_sect(s, ".rdata", IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ);
+    s->data_sect  = new_sect(s, ".data",  IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE);
+    update_sections(s);
 
     // insert and map code
     // .text section
     // re-encode all immediates to use largest branch size (rel32)
     logger_log(WHITE, "", WHITE, "mapping and writing code to .text\n");
     for (BASIC_BLOCK* bb : basic_blocks) {
-        SECTION* sect       = s.text_sect;
+        SECTION* sect       = s->text_sect;
         uint32_t file_start = sect->hdr.PointerToRawData + sect->bytes.size();
         uint32_t rva_start  = sect->hdr.VirtualAddress   + sect->bytes.size();
 
-        s.sym_to_offset[bb->id] = file_start;
-        s.sym_to_rva   [bb->id] = rva_start;
+        s->sym_to_offset[bb->id] = file_start;
+        s->sym_to_rva   [bb->id] = rva_start;
 
         logger_log(
             WHITE, "",
@@ -227,10 +226,10 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
 
         for (uint32_t instr_offset = 0; instr_t& instr : bb->instrs) {
             uint32_t instr_rva     = rva_start + instr_offset;
-            uint64_t curr_instr_va = s.image_base + instr_rva;
+            uint64_t curr_instr_va = s->image_base + instr_rva;
             
             // decode
-            auto [dec_ctx, dec_instr] = decode_instr(&s.bin.decoder, instr.bytes, instr.len);
+            auto [dec_ctx, dec_instr] = decode_instr(&s->bin.decoder, instr.bytes, instr.len);
 
             if (dec_instr.raw.imm[0].is_relative) {
                 assert(dec_instr.operand_count_visible == 1);
@@ -239,7 +238,7 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
                     WHITE, fmtf("<+%04X>", 
                         rva_start + instr_offset),
                     WHITE, fmtf("bb + %-4d : %s\t <forced rel32 branch size> \n",
-                        instr_offset,  serialize_instr(&s.bin, &instr).c_str()));
+                        instr_offset,  serialize_instr(&s->bin, &instr).c_str()));
 
                 // have to retrieve it like this to avoid weird sign bugs with zydis
                 sym_id_t target_sym_id = nullsid;
@@ -250,7 +249,7 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
 
                 // force extend to 32 bit branch width
                 instr_store_val(&instr, 0x12345678,
-                    &s.bin.decoder, &dec_instr, &dec_ctx, curr_instr_va);
+                    &s->bin.decoder, &dec_instr, &dec_ctx, curr_instr_va);
 
                 // copy in symbol id
                 memcpy(instr.bytes + instr.len - 4, &target_sym_id, 4);
@@ -259,7 +258,7 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
                     WHITE, fmtf("<+%04X>",
                         rva_start + instr_offset),
                     WHITE, fmtf("bb + %-4d : %s\n",
-                        instr_offset, serialize_instr(&s.bin, &instr).c_str()));
+                        instr_offset, serialize_instr(&s->bin, &instr).c_str()));
             }
 
             sect->bytes.insert(end(sect->bytes),
@@ -269,7 +268,7 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
             instr_offset += instr.len;
         }
     }
-    update_sections(&s);
+    update_sections(s);
 
     // insert and map data
     // .rdata & .data sections
@@ -287,13 +286,13 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
         });
 
     for (DATA_BLOCK* db : bin.data_blocks) {
-        SECTION* sect       = db->read_only ? s.rdata_sect : s.data_sect;
+        SECTION* sect       = db->read_only ? s->rdata_sect : s->data_sect;
         uint32_t file_start = sect->hdr.PointerToRawData + sect->bytes.size();
         uint32_t rva_start  = sect->hdr.VirtualAddress + sect->bytes.size();
 
-        s.db_to_sect[db] = sect;
-        s.db_to_offset[db] = file_start;
-        s.db_to_rva[db] = rva_start;
+        s->db_to_sect[db] = sect;
+        s->db_to_offset[db] = file_start;
+        s->db_to_rva[db] = rva_start;
 
         logger_log(
             WHITE, "",
@@ -309,20 +308,20 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
         }
 
         for (auto& [db_offset, sym] : db->dboffset_to_sym) {
-            s.sym_to_offset[sym->id] = file_start + db_offset;
-            s.sym_to_rva[sym->id]     = rva_start + db_offset;
+            s->sym_to_offset[sym->id] = file_start + db_offset;
+            s->sym_to_rva[sym->id]     = rva_start + db_offset;
 
             logger_log(
                 WHITE, fmtf("<+%04X>", rva_start + db_offset),
                 WHITE, fmtf("%s + %04X, db+%04X, sym_%d\n",
-                    sect->hdr.Name, s.sym_to_rva[sym->id] - sect->hdr.VirtualAddress,
+                    sect->hdr.Name, s->sym_to_rva[sym->id] - sect->hdr.VirtualAddress,
                     db_offset, sym->id));
         }
-        update_sections(&s);
+        update_sections(s);
     }
 
     // allocate file buffer
-    s.filebuf.insert(end(s.filebuf), calculate_binary_file_size(&s), 0);
+    s->filebuf.insert(end(s->filebuf), calculate_binary_file_size(s), 0);
 
 
     // create a unhooked formatter
@@ -344,8 +343,8 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
     // resolve relative data symbols
     for (SYMBOL* sym : bin.symbols) {
         if (sym->type == SYMBOL_TYPE_RELATIVE_INFO) {
-            s.sym_to_offset [sym->id] = sym->rel_offset;
-            s.sym_to_rva    [sym->id] = sym->rel_offset;
+            s->sym_to_offset [sym->id] = sym->rel_offset;
+            s->sym_to_rva    [sym->id] = sym->rel_offset;
         }
     }
 
@@ -354,8 +353,8 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
     logger_log(WHITE, "", WHITE, "resolving assembly and writing to file buffer\n");
 
     for (const BASIC_BLOCK* bb : basic_blocks) {
-        uint32_t file_start = s.sym_to_offset[bb->id];
-        uint32_t rva_start  = s.sym_to_rva[bb->id];
+        uint32_t file_start = s->sym_to_offset[bb->id];
+        uint32_t rva_start  = s->sym_to_rva[bb->id];
 
         logger_log(
             WHITE, "",
@@ -366,7 +365,7 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
             instr_t resolved_instr = instr;
 
             // decode
-            auto [dec_ctx, dec_instr] = decode_instr(&s.bin.decoder, instr.bytes, instr.len);
+            auto [dec_ctx, dec_instr] = decode_instr(&s->bin.decoder, instr.bytes, instr.len);
             
             // resolve symbol id into rva delta
             sym_id_t target_sym_id = nullsid;
@@ -376,7 +375,7 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
                     assert(dec_instr.raw.imm[0].size == 32);
                     target_sym_id = get_sym_id(&instr, &dec_instr);
 
-                    uint32_t target_rva = s.sym_to_rva[target_sym_id];
+                    uint32_t target_rva = s->sym_to_rva[target_sym_id];
                     uint32_t delta      = target_rva - (rva_start + instr_offset + instr.len);
 
                     memcpy(resolved_instr.bytes + instr.len - 4, &delta, 4);
@@ -387,7 +386,7 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
                     && dec_instr.raw.modrm.rm == 5) {
                     target_sym_id = get_sym_id(&instr, &dec_instr);
 
-                    uint32_t target_rva = s.sym_to_rva[target_sym_id];
+                    uint32_t target_rva = s->sym_to_rva[target_sym_id];
                     uint32_t delta      = target_rva - (rva_start + instr_offset + instr.len);
 
                     memcpy(resolved_instr.bytes + dec_instr.raw.disp.offset, &delta, 4);
@@ -398,18 +397,18 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
                 assert(!(dec_instr.attributes & ZYDIS_ATTRIB_IS_RELATIVE));
 
                 target_sym_id = get_sym_id(&instr, &dec_instr);
-                uint32_t target_rva = s.sym_to_rva[target_sym_id];
+                uint32_t target_rva = s->sym_to_rva[target_sym_id];
                 memcpy(resolved_instr.bytes + dec_instr.raw.disp.offset, &target_rva, 4);
             }
 
-            memcpy(&s.filebuf[file_start + instr_offset], resolved_instr.bytes, resolved_instr.len);
+            memcpy(&s->filebuf[file_start + instr_offset], resolved_instr.bytes, resolved_instr.len);
 
             logger_log(
                 WHITE, fmtf("<+%04X>", rva_start + instr_offset),
                 WHITE, fmtf("bb + %-4d : %-30s  %s\n",
                     instr_offset,
                     serialize_instr_ex(
-                        &s.bin.decoder,
+                        &s->bin.decoder,
                         &unhooked_formatter,
                         &resolved_instr).c_str(),
                     target_sym_id ? std::to_string(target_sym_id).c_str() : ""
@@ -426,16 +425,16 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
     uint32_t last_file_end = 0;
     
     for (DATA_BLOCK* db : data_blocks) {
-        uint32_t file_offset = s.db_to_offset[db];
-        uint32_t rva         = s.db_to_rva[db];
-        memcpy(&s.filebuf[file_offset], db->bytes.data(), db->bytes.size());
+        uint32_t file_offset = s->db_to_offset[db];
+        uint32_t rva         = s->db_to_rva[db];
+        memcpy(&s->filebuf[file_offset], db->bytes.data(), db->bytes.size());
         
         // spot overlapping errors
         assert(file_offset + db->bytes.size() <= last_file_start 
             || file_offset >= last_file_end);
 
         logger_log(
-            WHITE, fmtf("%s", db->name.c_str(), s.db_to_sect[db]->hdr.Name),
+            WHITE, fmtf("%s", db->name.c_str(), s->db_to_sect[db]->hdr.Name),
             WHITE, fmtf("inserted db: { %s, size: 0x%X, file offset: 0x%04X, rva: 0x%04X }\n",
                 db->name.c_str(), db->bytes.size(), file_offset, rva));
 
@@ -456,15 +455,15 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
             if (!sym->target_sym_id)
                 continue;
 
-            uint32_t file_offset = s.sym_to_offset[sym->id];
-            uint32_t rva         = s.sym_to_rva[sym->id];
+            uint32_t file_offset = s->sym_to_offset[sym->id];
+            uint32_t rva         = s->sym_to_rva[sym->id];
 
             if (sym->target_type == TARGET_TYPE_POINTER) {
                 assert(!db->uninitialized);
                 assert(db_offset <= sym->db->bytes.size() - 8);
 
-                uint64_t target_va = s.image_base + s.sym_to_rva[sym->target_sym_id];
-                memcpy(&s.filebuf[file_offset], &target_va, 8);
+                uint64_t target_va = s->image_base + s->sym_to_rva[sym->target_sym_id];
+                memcpy(&s->filebuf[file_offset], &target_va, 8);
 
                 uint32_t pfn = rva >> 12;
 
@@ -481,8 +480,8 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
             if (sym->target_type == TARGET_TYPE_RVA) {
                 assert(!db->uninitialized);
                 assert(db_offset <= sym->db->bytes.size() - 4);
-                uint32_t target_rva = s.sym_to_rva[sym->target_sym_id];
-                memcpy(&s.filebuf[file_offset], &target_rva, 4);
+                uint32_t target_rva = s->sym_to_rva[sym->target_sym_id];
+                memcpy(&s->filebuf[file_offset], &target_rva, 4);
 
                 logger_log(
                     WHITE, "rva target",
@@ -508,7 +507,7 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
 
     SECTION* reloc_sect = nullptr;
     if (!reloc_blocks.empty()) {
-        reloc_sect = new_sect(&s, ".reloc", IMAGE_SCN_MEM_READ);
+        reloc_sect = new_sect(s, ".reloc", IMAGE_SCN_MEM_READ);
         auto& reloc_data = reloc_sect->bytes;
 
         for (const auto& [pfn, block] : reloc_blocks) {
@@ -530,52 +529,52 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
             }
         }
 
-        update_sections(&s);
+        update_sections(s);
         
-        uint32_t file_offset = s.filebuf.size();
-        s.filebuf.insert(end(s.filebuf), reloc_sect->hdr.SizeOfRawData, 0);
-        memcpy(&s.filebuf[file_offset], reloc_data.data(), reloc_data.size());
+        uint32_t file_offset = s->filebuf.size();
+        s->filebuf.insert(end(s->filebuf), reloc_sect->hdr.SizeOfRawData, 0);
+        memcpy(&s->filebuf[file_offset], reloc_data.data(), reloc_data.size());
     }
 
     // set entry point
     if (bin_->entry_point) {
-        s.entry_point = s.sym_to_rva[bin_->entry_point->id];
+        s->entry_point = s->sym_to_rva[bin_->entry_point->id];
     } else {
-        s.entry_point = s.text_sect->hdr.VirtualAddress;
+        s->entry_point = s->text_sect->hdr.VirtualAddress;
     }
 
     // generate pe headers
-    auto doshdr = reinterpret_cast<IMAGE_DOS_HEADER*>(&s.filebuf[0]);
+    auto doshdr = reinterpret_cast<IMAGE_DOS_HEADER*>(&s->filebuf[0]);
     *doshdr = {
         .e_magic  = IMAGE_DOS_SIGNATURE,
         .e_lfanew = sizeof(IMAGE_DOS_HEADER),
     };
 
-    auto nthdrs = reinterpret_cast<IMAGE_NT_HEADERS*>(&s.filebuf[doshdr->e_lfanew]);
+    auto nthdrs = reinterpret_cast<IMAGE_NT_HEADERS*>(&s->filebuf[doshdr->e_lfanew]);
     *nthdrs = {
         .Signature = IMAGE_NT_SIGNATURE,
         .FileHeader = {
             .Machine              = IMAGE_FILE_MACHINE_AMD64,
-            .NumberOfSections     = (WORD)s.sections.size(),
+            .NumberOfSections     = (WORD)s->sections.size(),
             .SizeOfOptionalHeader = sizeof(IMAGE_OPTIONAL_HEADER),
             .Characteristics      = IMAGE_FILE_EXECUTABLE_IMAGE,
         },
 
         .OptionalHeader = {
             .Magic                = IMAGE_NT_OPTIONAL_HDR64_MAGIC,
-            .AddressOfEntryPoint  = s.entry_point,
-            .BaseOfCode           = s.text_sect->hdr.VirtualAddress,
-            .ImageBase            = s.image_base,
-            .SectionAlignment     = s.section_alignment,
-            .FileAlignment        = s.file_alignment,
+            .AddressOfEntryPoint  = s->entry_point,
+            .BaseOfCode           = s->text_sect->hdr.VirtualAddress,
+            .ImageBase            = s->image_base,
+            .SectionAlignment     = s->section_alignment,
+            .FileAlignment        = s->file_alignment,
 
             .MajorOperatingSystemVersion = 6,
             .MinorOperatingSystemVersion = 0,
             .MajorSubsystemVersion       = 6,
             .MinorSubsystemVersion       = 0,
 
-            .SizeOfImage   = calculate_binary_virtual_size(&s),
-            .SizeOfHeaders = calculate_pehdr_size(&s),
+            .SizeOfImage   = calculate_binary_virtual_size(s),
+            .SizeOfHeaders = calculate_pehdr_size(s),
 
             .Subsystem          = IMAGE_SUBSYSTEM_WINDOWS_CUI,
             .DllCharacteristics = IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE |
@@ -594,7 +593,7 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
     // set data directories
     if (!import_modules.empty()) {
         auto& dir           = nthdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
-        dir.VirtualAddress  = s.sym_to_rva[iat_sym_id];
+        dir.VirtualAddress  = s->sym_to_rva[iat_sym_id];
         dir.Size            = iat_size;
     }
 
@@ -605,14 +604,14 @@ ASSEMBLED_BINARY build_pe(const BINARY* bin_) {
     }
 
     // set section headers
-    for (int i = 0; i < s.sections.size(); i++) {
-        SECTION* sect = s.sections[i];
+    for (int i = 0; i < s->sections.size(); i++) {
+        SECTION* sect = s->sections[i];
 
         if (sect->bytes.empty())
             continue;
 
         uint32_t hdr_offset = sizeof(IMAGE_DOS_HEADER) + sizeof(IMAGE_NT_HEADERS) + (i * sizeof(IMAGE_SECTION_HEADER));
-        memcpy(&s.filebuf[hdr_offset], &sect->hdr, sizeof(IMAGE_SECTION_HEADER));
+        memcpy(&s->filebuf[hdr_offset], &sect->hdr, sizeof(IMAGE_SECTION_HEADER));
     }
 
     return s;
@@ -647,17 +646,7 @@ void assembled_binary_print(ASSEMBLED_BINARY* asm_bin) {
     printf_ex(BRIGHT_BLUE, "--------------CODE--------------------------\n");
 
     for (BASIC_BLOCK* bb : bin->basic_blocks) {
-        printf_ex(BRIGHT_BLUE, "[basic block]: %d, size: %d   %s\n", bb->id, bb->size(), 
-            bin->symbols[bb->id]->name.c_str());
-
-        for (int bb_offset = 0; const instr_t& instr : bb->instrs) {
-            printf("<+%0X>", asm_bin->sym_to_rva[bb->id] + bb_offset);
-            printf("\t+%-4d: %s\n", bb_offset, serialize_instr(bin, &instr).c_str());
-
-            bb_offset += instr.len;
-        }
-
-        printf("\t--> %d\n", bb->fallthrough_sym_id);
+        print_bb(bb, asm_bin->sym_to_rva[bb->id]);
     }
 
     for (int sect_idx = 0; sect_idx < 2; sect_idx++) {

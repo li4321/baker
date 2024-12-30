@@ -106,3 +106,22 @@ void logger_warn__(std::string msg) {
     printf_ex(RED, "[!warning!]");
     printf_ex(WHITE, msg.c_str());
 }
+
+void print_bb(BASIC_BLOCK* bb, uint32_t rva) {
+    BINARY* bin = bb->bin_;
+
+    printf_ex(BRIGHT_BLUE, "[basic block]: %d, size: %d   %s\n", bb->id, bb->size(),
+        bin->symbols[bb->id]->name.c_str());
+
+    for (int bb_offset = 0; const instr_t& instr : bb->instrs) {
+        if (rva) {
+            printf("<+%0X>", rva + bb_offset);
+        }
+
+        printf("\t+%-4d: %s\n", bb_offset, serialize_instr(bin, &instr).c_str());
+
+        bb_offset += instr.len;
+    }
+
+    printf("\t--> %d\n", bb->fallthrough_sym_id);
+}

@@ -266,43 +266,43 @@ void DISASSEMBLER::sort_basic_blocks() {
 }
 
 
-DISASSEMBLED_BINARY disassemble_pe(std::vector<uint8_t> filebuf) {
-    DISASSEMBLER s = {};
-    s.filebuf    = filebuf;
-    s.doshdr     = reinterpret_cast<IMAGE_DOS_HEADER*>(&filebuf[0]);
-    s.nthdrs     = reinterpret_cast<IMAGE_NT_HEADERS*>(&filebuf[s.doshdr->e_lfanew]);
-    s.datadir    = reinterpret_cast<IMAGE_DATA_DIRECTORY*>(s.nthdrs->OptionalHeader.DataDirectory);
-    s.sects      = IMAGE_FIRST_SECTION(s.nthdrs);
-    s.image_base = s.nthdrs->OptionalHeader.ImageBase;
+DISASSEMBLER* disassemble_pe(std::vector<uint8_t> filebuf) {
+    DISASSEMBLER* s = new DISASSEMBLER{};
+    s->filebuf    = filebuf;
+    s->doshdr     = reinterpret_cast<IMAGE_DOS_HEADER*>(&s->filebuf[0]);
+    s->nthdrs     = reinterpret_cast<IMAGE_NT_HEADERS*>(&s->filebuf[s->doshdr->e_lfanew]);
+    s->datadir    = reinterpret_cast<IMAGE_DATA_DIRECTORY*>(s->nthdrs->OptionalHeader.DataDirectory);
+    s->sects      = IMAGE_FIRST_SECTION(s->nthdrs);
+    s->image_base = s->nthdrs->OptionalHeader.ImageBase;
 
     // initialize rva map
-    s.rva_map = std::vector<RVA_MAP_ENTRY>(
-        s.nthdrs->OptionalHeader.SizeOfImage, RVA_MAP_ENTRY{});
+    s->rva_map = std::vector<RVA_MAP_ENTRY>(
+        s->nthdrs->OptionalHeader.SizeOfImage, RVA_MAP_ENTRY{});
 
     // sync sym_rva_map with the null symbol to placehold for symbol id 0
-    s.sym_rva_map.push_back(0);
+    s->sym_rva_map.push_back(0);
     
-    s.create_section_dbs();
-    s.parse_imports();
-    s.parse_exceptions();
-    s.parse_relocations();
+    s->create_section_dbs();
+    s->parse_imports();
+    s->parse_exceptions();
+    s->parse_relocations();
 
     // disassemble starting from entry point
-    uint32_t entry_rva   = s.nthdrs->OptionalHeader.AddressOfEntryPoint;
-    auto&    entry_point = s.rva_map[entry_rva];
+    uint32_t entry_rva   = s->nthdrs->OptionalHeader.AddressOfEntryPoint;
+    auto&    entry_point = s->rva_map[entry_rva];
     if (entry_point.id == nullsid) 
-        entry_point = s.queue_rva(entry_rva, "entrypoint");
+        entry_point = s->queue_rva(entry_rva, "entrypoint");
 
-    s.bin.set_entry(s.bin.symbols[entry_point.id]->bb);
-    s.disassemble();
-    s.sort_basic_blocks();
+    s->bin.set_entry(s->bin.symbols[entry_point.id]->bb);
+    s->disassemble();
+    s->sort_basic_blocks();
 
-    s.collect_jump_tables();
-    s.resolve_jpt_entries();
-    s.disassemble();
+    s->collect_jump_tables();
+    s->resolve_jpt_entries();
+    s->disassemble();
 
-    s.sort_basic_blocks();
-    s.verify();
+    s->sort_basic_blocks();
+    s->verify();
     return s;
 }
 

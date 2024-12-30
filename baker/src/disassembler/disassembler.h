@@ -24,12 +24,12 @@ struct RVA_MAP_ENTRY {
 struct DISASSEMBLED_BINARY {    
     BINARY bin;
     
-    std::vector<uint8_t>    filebuf;
-    IMAGE_DOS_HEADER*       doshdr;
-    IMAGE_NT_HEADERS*       nthdrs;
-    IMAGE_DATA_DIRECTORY*   datadir;
-    IMAGE_SECTION_HEADER*   sects;
-    uint64_t                image_base;
+    std::vector<uint8_t>  filebuf;
+    IMAGE_DOS_HEADER*     doshdr;
+    IMAGE_NT_HEADERS*     nthdrs;
+    IMAGE_DATA_DIRECTORY* datadir;
+    IMAGE_SECTION_HEADER* sects;
+    uint64_t              image_base;
 
     std::vector<RVA_MAP_ENTRY> rva_map;
     std::vector<RVA_DB_ENTRY>  rva_db_map;
@@ -76,12 +76,10 @@ struct DISASSEMBLER : DISASSEMBLED_BINARY {
     std::map<sym_id_t, bool> bb_explored_map;
     std::set<uint32_t>       jpt_rva_list;
     void collect_jump_tables();
-    void collect_jpt_sizes();
-    void brute_force_remaining_jpt_sizes();
     void resolve_jpt_entries();
 
     // verification
     void verify();
 };
 
-DISASSEMBLED_BINARY disassemble_pe(std::vector<uint8_t> filebuf);
+DISASSEMBLER* disassemble_pe(std::vector<uint8_t> filebuf);

@@ -114,7 +114,7 @@
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Lib>
-      <AdditionalDependencies>zydis.lib;zycore.lib</AdditionalDependencies>
+      <AdditionalDependencies>Zydis.lib;Zycore.lib</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>$(ProjectDir)..\dependencies\zydis\msvc\bin\DebugX64</AdditionalLibraryDirectories>

@@ -56,8 +56,8 @@ struct OPERAND {
 };
 
 
-OPERAND Reg   (ZydisRegister reg);
-OPERAND Imm  (int64_t immediate);
+OPERAND Reg(ZydisRegister reg);
+OPERAND Imm(int64_t immediate);
 
 OPERAND ImmRel(sym_id_t symbol_id);
 OPERAND RipRel(sym_id_t symbol_id, int len = 8);
