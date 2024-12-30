@@ -57,6 +57,10 @@ struct BINARY {
     // getters
     SYMBOL*     get_symbol(std::string name);
     DATA_BLOCK* get_data_block(std::string name);
+
+    // xrefs
+    std::vector<XREF> get_xrefs(sym_id_t target_sym_id);
+    std::vector<XREF> get_xrefs(BASIC_BLOCK* bb, sym_id_t target_sym_id);
 };
 
 void binary_duplicate(const BINARY* bin, BINARY* new_bin);

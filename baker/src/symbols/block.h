@@ -13,7 +13,6 @@ struct BASIC_BLOCK {
     sym_id_t             id;
     std::vector<instr_t> instrs;
     sym_id_t             fallthrough_sym_id;
-    // std::string       parent_sect;
     struct BINARY* bin_;
 
     struct BASIC_BLOCK* insert(int idx, instr_t instr);
@@ -22,8 +21,7 @@ struct BASIC_BLOCK {
     struct BASIC_BLOCK* push(std::vector<instr_t> instructions_array);
     struct BASIC_BLOCK* fall(sym_id_t id);
     struct BASIC_BLOCK* fall_to_next();
-    // struct BASIC_BLOCK* map_to_sect(std::string sect_name);
-    
+
     size_t   size();
     uint32_t get_instr_offset(int idx);
 };

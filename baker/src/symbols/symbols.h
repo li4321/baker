@@ -49,3 +49,8 @@ struct SYMBOL {
     // relocation info
     uint32_t rel_offset;
 };
+
+struct XREF {
+    SYMBOL* sym;
+    int instr_idx;
+};

@@ -45,6 +45,6 @@ struct ASSEMBLED_BINARY {
 };
 
 uint32_t align_up(uint32_t val, uint32_t alignment);
-ASSEMBLED_BINARY build_pe(const BINARY* bin_);
+ASSEMBLED_BINARY* build_pe(const BINARY* bin_);
 
 void assembled_binary_print(ASSEMBLED_BINARY* asm_bin);

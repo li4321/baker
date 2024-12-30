@@ -134,7 +134,8 @@ ZyanStatus hook_zydis_format_operand_imm(
 
 void binary_duplicate(const BINARY* bin, BINARY* new_bin) {
     std::map<IMPORT_ROUTINE*, IMPORT_ROUTINE*>  old_to_new_routine;
-    std::map<DATA_BLOCK*, DATA_BLOCK*>            old_to_new_db;
+    std::map<DATA_BLOCK*, DATA_BLOCK*>          old_to_new_db;
+    std::map<BASIC_BLOCK*, BASIC_BLOCK*>        old_to_new_bb;
 
     for (IMPORT_MODULE* old_mod : bin->import_modules) {
         IMPORT_MODULE* mod = new IMPORT_MODULE{};
@@ -156,10 +157,19 @@ void binary_duplicate(const BINARY* bin, BINARY* new_bin) {
     for (DATA_BLOCK* old_db : bin->data_blocks) {
         DATA_BLOCK* db = new_bin->data_blocks.emplace_back(new DATA_BLOCK{});
         db->name      = old_db->name;
-        db->bytes      = old_db->bytes;
+        db->bytes     = old_db->bytes;
         db->read_only = old_db->read_only;
         db->bin_      = new_bin;
         old_to_new_db[old_db] = db;
+    }
+
+    for (BASIC_BLOCK* old_bb : bin->basic_blocks) {
+        BASIC_BLOCK* bb = new_bin->basic_blocks.emplace_back(new BASIC_BLOCK{});
+        bb->id                 = old_bb->id;
+        bb->instrs             = old_bb->instrs;
+        bb->fallthrough_sym_id = old_bb->fallthrough_sym_id;
+        bb->bin_               = new_bin;
+        old_to_new_bb[old_bb]  = bb;
     }
 
     new_bin->symbols = bin->symbols;
@@ -175,12 +185,9 @@ void binary_duplicate(const BINARY* bin, BINARY* new_bin) {
 
         if (sym->type == SYMBOL_TYPE_CODE) {
             BASIC_BLOCK* old_bb = old_sym->bb;
-            BASIC_BLOCK* bb = new_bin->basic_blocks.emplace_back(new BASIC_BLOCK{});
-            bb->id                 = sym->id;
-            bb->instrs             = old_bb->instrs;
-            bb->fallthrough_sym_id = old_bb->fallthrough_sym_id;
-            bb->bin_               = new_bin;
-            sym->bb                = bb;
+            BASIC_BLOCK* bb     = old_to_new_bb[old_bb];
+            assert(bb->id == sym->id);
+            sym->bb = bb;
         }
 
         else if (sym->type == SYMBOL_TYPE_DATA) {
