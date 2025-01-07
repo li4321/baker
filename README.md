@@ -1,4 +1,4 @@
-# binary rewriter/reassembler for x64 PE binaries
+# binary rewriter/reassembler for x64 PE binaries [WIP]
 
 takes in a binary and lifts the assembly into a very basic intermediate representation.
 you can then modify this intermediate representation, and reassemble it into a new binary.
@@ -7,11 +7,12 @@ you can then modify this intermediate representation, and reassemble it into a n
   - C binary with no CRT
   - C binary with CRT
 
-## supports:
+## currently supports:
   - jump tables
 
-## coming updates:
-  - documentation
+## work in progress:
+  - .pdata exception directory
+  - partial binary rewriting option to eliminate certain "unsolvable" issues
 
 ## example usage
 
@@ -113,11 +114,9 @@ void spam_nops_1337(BINARY* bin) {
 }
 ```
 
-## potential issues/todos:
-  - callback functions which never gets called from the binary itself
-  - data within .text section
-  - PDB parsing support (for improved disassembling)
-  - rebuilding .pdata exception table
+## current issues:
+  - differentiating code (callback functions never called within binary itself) and data within executable sections, if there are also data in there
+  - exceptions
 
 ## inspirations from:
 https://github.com/jonomango/chum
